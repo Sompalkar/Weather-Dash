@@ -4,7 +4,7 @@
 
 import { useSearchParams } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
-import { fetchForecast } from "../../api/weather"
+import { fetchForecast, fetchCurrentWeather } from "../../api/weather"
 import { ArrowLeft, MapPin, Sun, Cloud, CloudRain, CloudSnow, Gauge, Sunrise, Sunset } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
@@ -22,7 +22,6 @@ export default function CityDetailPage() {
 
 
 
-
   const {
     data: weather,
     isLoading: isWeatherLoading,
@@ -30,27 +29,8 @@ export default function CityDetailPage() {
   } = useQuery({
     queryKey: ["current-weather", lat, lon, unit],
     queryFn: async () => {
-      console.log("Fetching weather for:", { lat, lon, unit })
-      try {
-      
-        const response = await fetch(`http://localhost:8080/api/v1/weather/current?lat=${lat}&lon=${lon}&unit=${unit}`)
-        console.log("Weather response status:", response.status)
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-        }
-        const result = await response.json()
-        console.log("Weather raw result:", result)
-
-        if (!result.ok || !result.data) {
-          throw new Error(result.error?.message || "Weather data not available")
-        }
-
-        console.log("Weather processed result:", result.data)
-        return result.data
-      } catch (error) {
-        console.error("Weather fetch error:", error)
-        throw error
-      }
+      if (!lat || !lon) throw new Error("Missing coordinates")
+      return fetchCurrentWeather(Number(lat), Number(lon), unit)
     },
     enabled: !!lat && !!lon,
     staleTime: 5 * 60 * 1000,
@@ -183,7 +163,7 @@ export default function CityDetailPage() {
       </div>
 
       <main className="container mx-auto px-4 py-6">
-  
+ 
         {(weatherError || forecastError) && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">API Errors:</h3>
@@ -201,9 +181,9 @@ export default function CityDetailPage() {
           </div>
         ) : weather && forecast ? (
           <div className="grid grid-cols-1 xl:grid-cols-5 gap-6">
-    
+   
             <div className="xl:col-span-4 space-y-6">
-    
+   
               <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm p-8">
                 <div className="flex items-start justify-between mb-6">
                   <div>
@@ -371,4 +351,4 @@ export default function CityDetailPage() {
       </main>
     </div>
   )
-}
+} 
