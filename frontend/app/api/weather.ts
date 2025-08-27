@@ -1,6 +1,4 @@
-const API_BASE = typeof window !== 'undefined' 
-  ? (window as any).__NEXT_DATA__?.props?.apiBase || 'http://localhost:8080'
-  : 'http://localhost:8080'
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || ''
 
 export interface WeatherData {
   location: {
